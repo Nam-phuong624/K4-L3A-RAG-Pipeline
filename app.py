@@ -367,17 +367,29 @@ for msg in st.session_state.messages:
             unsafe_allow_html=True,
         )
 
-        # Hiển thị khối Dẫn chiếu / Citation nếu có
-        if sources:
+        # Hiển thị khối Dẫn chiếu / Citation theo định dạng (1), (2)
+        citations = msg.get("citations", [])
+        if not citations and sources:
             primary_src = sources[0].get("metadata", {})
             title = primary_src.get("title", "Quy chế ĐHQGHN & Thông báo UET")
             source_file = primary_src.get("source", "")
-            
+            citations = [
+                {"num": "(1)", "desc": title},
+                {"num": "(2)", "desc": f"{source_file}."},
+            ]
+
+        if citations:
+            items_html = "".join(
+                f"<div style='margin-bottom: 3px;'><b>{c['num']}</b> {c['desc']}</div>"
+                for c in citations
+            )
             st.markdown(
                 f"""
                 <div class="citation-box">
                   <div class="citation-label">Dẫn chiếu chính thức</div>
-                  <div class="citation-text"><b>{title}</b> &nbsp;·&nbsp; <i>Nguồn: {source_file}</i></div>
+                  <div style="font-size: 13.5px; line-height: 1.6; margin-top: 4px; color: #201f1d;">
+                    {items_html}
+                  </div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -450,6 +462,7 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
         answer = gen_result.get("answer", "Tôi không thể xác minh thông tin này từ nguồn hiện có.")
         sources = gen_result.get("sources", [])
         retrieval_source = gen_result.get("retrieval_source", "hybrid")
+        citations = gen_result.get("citations", [])
 
         # Lưu câu trả lời của assistant
         st.session_state.messages.append({
@@ -457,6 +470,7 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
             "content": answer,
             "sources": sources,
             "retrieval_source": retrieval_source,
+            "citations": citations,
         })
         st.rerun()
 
