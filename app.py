@@ -1,3 +1,4 @@
+import uuid
 import streamlit as st
 from dotenv import load_dotenv
 
@@ -36,11 +37,64 @@ CLASSICAL_CSS = """
   --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* App Background and Font */
-.stApp {
-  background-color: var(--color-bg) !important;
-  color: var(--color-text) !important;
+/* Force light warm background across ALL Streamlit containers - No Black Bars! */
+html, body, .stApp, 
+[data-testid="stAppViewContainer"], 
+[data-testid="stAppViewBlockContainer"], 
+[data-testid="stHeader"],
+[data-testid="stToolbar"],
+header,
+footer,
+.main,
+div[data-testid="stBottom"],
+.stBottom {
+  background-color: #f3f2f2 !important;
+  color: #201f1d !important;
   font-family: var(--font-body) !important;
+}
+
+/* Header bar styling */
+header[data-testid="stHeader"] {
+  background-color: #f3f2f2 !important;
+  border-bottom: 1px solid var(--color-divider) !important;
+}
+
+header[data-testid="stHeader"] * {
+  color: var(--color-text) !important;
+}
+
+/* Bottom Chat Input Fixed Container - eliminate dark bar */
+div[data-testid="stBottom"],
+.stBottom,
+div[data-testid="stBottom"] > div {
+  background-color: #f3f2f2 !important;
+}
+
+div[data-testid="stChatInput"] {
+  background-color: transparent !important;
+}
+
+div[data-testid="stChatInput"] > div {
+  background-color: #ffffff !important;
+  border: 1px solid var(--color-divider) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
+}
+
+div[data-testid="stChatInput"] textarea {
+  color: #201f1d !important;
+  background-color: #ffffff !important;
+  font-family: var(--font-body) !important;
+  font-size: 14.5px !important;
+}
+
+div[data-testid="stChatInput"] textarea::placeholder {
+  color: rgba(32, 31, 29, 0.45) !important;
+}
+
+div[data-testid="stChatInput"] button {
+  color: var(--color-accent) !important;
+  border: none !important;
 }
 
 /* Sidebar Styling */
@@ -70,50 +124,15 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-text) !important;
   border: 1px solid var(--color-divider) !important;
   border-radius: 4px !important;
-  background-color: transparent !important;
+  background-color: #ffffff !important;
   transition: all 0.15s ease !important;
   padding: 0.35rem 0.75rem !important;
 }
 
 .stButton > button:hover {
-  background-color: rgba(32, 31, 29, 0.06) !important;
+  background-color: rgba(182, 130, 53, 0.08) !important;
   border-color: var(--color-accent) !important;
   color: var(--color-accent) !important;
-}
-
-/* Primary new chat button */
-div[data-testid="stSidebar"] .stButton > button[kind="primary"],
-.btn-new-chat > button {
-  color: var(--color-accent) !important;
-  border-color: var(--color-accent) !important;
-  background: transparent !important;
-  width: 100% !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 8px !important;
-}
-
-div[data-testid="stSidebar"] .stButton > button[kind="primary"]:hover,
-.btn-new-chat > button:hover {
-  background: rgba(182, 130, 53, 0.12) !important;
-}
-
-/* Input box styling */
-div[data-testid="stChatInput"] textarea,
-.stTextInput > div > div > input {
-  font-family: var(--font-body) !important;
-  font-size: 14px !important;
-  color: var(--color-text) !important;
-  background: #ffffff !important;
-  border: 1px solid var(--color-divider) !important;
-  border-radius: 4px !important;
-}
-
-div[data-testid="stChatInput"] textarea:focus,
-.stTextInput > div > div > input:focus {
-  border-color: var(--color-accent) !important;
-  box-shadow: 0 0 0 1px var(--color-accent) !important;
 }
 
 /* Chat Message Cards */
@@ -179,12 +198,6 @@ div[data-testid="stChatInput"] textarea:focus,
   font-weight: 600;
 }
 
-.citation-text {
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  color: var(--color-text);
-}
-
 /* Sidebar History Section Labels */
 .sidebar-section-title {
   font-family: var(--font-ui);
@@ -223,8 +236,15 @@ div[data-testid="stChatInput"] textarea:focus,
 st.markdown(CLASSICAL_CSS, unsafe_allow_html=True)
 
 # ---------------------------------------------------------
-# Session State Initialization
+# Session State Initialization (Dynamic Real Chat History)
 # ---------------------------------------------------------
+# Mỗi session lưu: {"id": str, "title": str, "messages": list}
+if "sessions" not in st.session_state:
+    st.session_state.sessions = []
+
+if "current_session_id" not in st.session_state:
+    st.session_state.current_session_id = str(uuid.uuid4())
+
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -232,8 +252,58 @@ if "pending_query" not in st.session_state:
     st.session_state.pending_query = None
 
 
+def create_new_chat():
+    """Tạo phiên hội thoại mới và lưu phiên hiện tại nếu có tin nhắn."""
+    save_current_session()
+    new_id = str(uuid.uuid4())
+    st.session_state.current_session_id = new_id
+    st.session_state.messages = []
+    st.session_state.pending_query = None
+
+
+def save_current_session():
+    """Lưu trữ phiên hội thoại hiện tại vào danh sách lịch sử."""
+    if not st.session_state.messages:
+        return
+    cur_id = st.session_state.current_session_id
+    # Đặt tiêu đề là nội dung câu hỏi đầu tiên của người dùng
+    title = "Hội thoại mới"
+    for m in st.session_state.messages:
+        if m["role"] == "user":
+            title = m["content"].strip()
+            if len(title) > 36:
+                title = title[:33] + "..."
+            break
+
+    # Cập nhật nếu đã tồn tại, hoặc thêm mới
+    found = False
+    for s in st.session_state.sessions:
+        if s["id"] == cur_id:
+            s["title"] = title
+            s["messages"] = list(st.session_state.messages)
+            found = True
+            break
+    if not found:
+        st.session_state.sessions.insert(0, {
+            "id": cur_id,
+            "title": title,
+            "messages": list(st.session_state.messages),
+        })
+
+
+def load_session(session_id: str):
+    """Nạp lại một hội thoại từ lịch sử."""
+    save_current_session()
+    for s in st.session_state.sessions:
+        if s["id"] == session_id:
+            st.session_state.current_session_id = s["id"]
+            st.session_state.messages = list(s["messages"])
+            st.session_state.pending_query = None
+            st.rerun()
+
+
 def trigger_query(text: str):
-    """Kích hoạt câu hỏi ngay lập tức từ chip hoặc lịch sử."""
+    """Kích hoạt câu hỏi ngay lập tức từ chip gợi ý."""
     st.session_state.pending_query = text
     st.rerun()
 
@@ -254,36 +324,44 @@ with st.sidebar:
 
     # Nút Hội thoại mới
     if st.button("＋  Hội thoại mới", key="btn_new_chat", use_container_width=True):
-        st.session_state.messages = []
-        st.session_state.pending_query = None
+        create_new_chat()
         st.rerun()
 
     st.markdown("<hr style='margin: 8px 0; border: none; border-top: 1px solid rgba(32, 31, 29, 0.15);'>", unsafe_allow_html=True)
 
-    # 1. Lịch sử / Chủ đề tra cứu nhanh
-    st.markdown("<div class='sidebar-section-title'>Hôm nay</div>", unsafe_allow_html=True)
-    if st.button("Học lại môn điểm F", key="hist_1", use_container_width=True):
-        trigger_query("Điểm F học phần có bắt buộc phải học lại không và tính điểm thế nào?")
-    if st.button("Học bổng UET bao nhiêu tiền", key="hist_2", use_container_width=True):
-        trigger_query("học bổng uet bao nhiêu tiền")
+    # Lịch sử hội thoại động thực tế (Chỉ hiển thị các hội thoại bạn đã chat)
+    st.markdown("<div class='sidebar-section-title'>Lịch sử hội thoại của bạn</div>", unsafe_allow_html=True)
+    
+    # Đồng bộ session hiện tại vào danh sách để cập nhật sidebar ngay
+    save_current_session()
 
-    st.markdown("<div class='sidebar-section-title'>7 ngày trước</div>", unsafe_allow_html=True)
-    if st.button("Điều kiện xét tốt nghiệp", key="hist_3", use_container_width=True):
-        trigger_query("Điều kiện để sinh viên được công nhận tốt nghiệp đại học là gì?")
-    if st.button("Cảnh báo học vụ đợt 1", key="hist_4", use_container_width=True):
-        trigger_query("Điều kiện về điểm trung bình để không bị cảnh báo học vụ?")
-    if st.button("Hạn nộp ảnh làm bằng K66", key="hist_5", use_container_width=True):
-        trigger_query("Sinh viên tốt nghiệp đợt tháng 01/2026 nộp ảnh làm bằng ở đâu và hạn chót khi nào?")
+    if not st.session_state.sessions:
+        st.markdown(
+            """
+            <div style="font-family: 'Inter', sans-serif; font-size: 12px; color: rgba(32, 31, 29, 0.48); font-style: italic; padding: 6px 0; line-height: 1.5;">
+              Chưa có hội thoại nào.<br>Lịch sử sẽ tự động lưu khi bạn bắt đầu trò chuyện.
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    else:
+        for idx, s in enumerate(st.session_state.sessions):
+            is_active = s["id"] == st.session_state.current_session_id
+            prefix = "💬 " if not is_active else "👉 "
+            btn_label = f"{prefix}{s['title']}"
+            if st.button(btn_label, key=f"sess_btn_{s['id']}_{idx}", use_container_width=True):
+                load_session(s["id"])
 
-    st.markdown("<div class='sidebar-section-title'>30 ngày trước</div>", unsafe_allow_html=True)
-    if st.button("Gia hạn thẻ BHYT năm 2026", key="hist_6", use_container_width=True):
-        trigger_query("Sinh viên thắc mắc gia hạn BHYT năm 2026 liên hệ phòng nào và hạn chót khi nào?")
-    if st.button("Cuộc thi SV Khởi nghiệp", key="hist_7", use_container_width=True):
-        trigger_query("Sinh viên UET đăng ký tham gia cuộc thi Ý tưởng khởi nghiệp trước ngày nào và nộp gì?")
+        if st.button("🗑️ Xóa toàn bộ lịch sử", key="btn_clear_all_history", use_container_width=True):
+            st.session_state.sessions = []
+            st.session_state.messages = []
+            st.session_state.current_session_id = str(uuid.uuid4())
+            st.session_state.pending_query = None
+            st.rerun()
 
     st.markdown("<hr style='margin: 12px 0; border: none; border-top: 1px solid rgba(32, 31, 29, 0.15);'>", unsafe_allow_html=True)
 
-    # 2. Cấu hình Retrieval & Kho tri thức
+    # Cấu hình Retrieval & Kho tri thức
     st.markdown("<div class='sidebar-section-title'>Cấu hình Retrieval</div>", unsafe_allow_html=True)
     top_k = st.slider("Số lượng Chunks (top_k)", min_value=3, max_value=10, value=5)
 
@@ -327,7 +405,7 @@ st.markdown(
 if len(st.session_state.messages) == 0:
     st.markdown(
         """
-        <div style="border: 1px solid rgba(32, 31, 29, 0.12); border-radius: 6px; padding: 24px; background: #faf9f9; margin-bottom: 24px;">
+        <div style="border: 1px solid rgba(32, 31, 29, 0.12); border-radius: 6px; padding: 24px; background: #ffffff; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
           <div style="font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 600; margin-bottom: 6px; color: #201f1d;">Chào mừng bạn đến với Trợ lý Học vụ UET</div>
           <div style="font-size: 14.5px; line-height: 1.6; color: rgba(32, 31, 29, 0.8);">
             Bạn có thể tra cứu nhanh các quy định đào tạo theo tín chỉ, điều kiện tốt nghiệp, mức học bổng, xử lý học vụ và các thông báo chính thức từ Trường ĐH Công nghệ & ĐHQGHN.
@@ -414,7 +492,7 @@ for msg in st.session_state.messages:
 
 
 # ---------------------------------------------------------
-# Suggestion Chips (Replicating showChips in Chatbot.html)
+# Suggestion Chips (Gợi ý câu hỏi nhanh)
 # ---------------------------------------------------------
 st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
 chip_col1, chip_col2, chip_col3, chip_col4 = st.columns(4)
@@ -449,8 +527,8 @@ elif user_input:
     active_query = user_input
 
 if active_query:
-    # 1. Thêm tin nhắn sinh viên
     st.session_state.messages.append({"role": "user", "content": active_query})
+    save_current_session()
     st.rerun()
 
 # Nếu tin nhắn cuối cùng là của user và chưa có câu trả lời của assistant
@@ -464,7 +542,6 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
         retrieval_source = gen_result.get("retrieval_source", "hybrid")
         citations = gen_result.get("citations", [])
 
-        # Lưu câu trả lời của assistant
         st.session_state.messages.append({
             "role": "assistant",
             "content": answer,
@@ -472,6 +549,7 @@ if len(st.session_state.messages) > 0 and st.session_state.messages[-1]["role"] 
             "retrieval_source": retrieval_source,
             "citations": citations,
         })
+        save_current_session()
         st.rerun()
 
 
@@ -486,3 +564,4 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
