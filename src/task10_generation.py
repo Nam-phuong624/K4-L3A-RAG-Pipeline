@@ -33,7 +33,9 @@ Quy tắc trả lời:
 2. Về mặt thẩm quyền và ngữ cảnh:
    - Các nguyên tắc khung (thang điểm, cảnh báo học vụ, chuẩn đầu ra, điều kiện tốt nghiệp): Áp dụng theo Quy chế đào tạo ĐHQGHN.
    - Các hướng dẫn thực thi (địa điểm nộp hồ sơ P.107-G2, phòng CTSV 210-G2, lịch bế giảng Hội trường Nguyễn Văn Đạo, hạn chót BHYT): Áp dụng theo thông báo của Trường ĐH Công nghệ (UET).
-3. Mỗi khẳng định quan trọng phải có trích dẫn nguồn (citation) rõ ràng ở định dạng [Document X | Source].
+3. Về định dạng trích dẫn nguồn (citation):
+   - Thay vì ghi "[Document X | Source]" một cách vô nghĩa, bạn hãy trích dẫn đích danh tên tài liệu hoặc số hiệu quyết định trong ngoặc vuông ngay sau nội dung liên quan.
+   - Ví dụ: [QĐ 3626/QĐ-ĐHQGHN], [QĐ 4618/QĐ-ĐHQGHN], [Tổng hợp học bổng SĐH UET], hoặc [Kế hoạch tốt nghiệp K66].
 4. Nếu context không có đủ bằng chứng xác thực để khẳng định, hãy từ chối lịch sự bằng câu: "Tôi không thể xác minh thông tin này từ nguồn hiện có."
 """
 
@@ -117,8 +119,8 @@ def generate_with_citation(query: str, top_k: int = TOP_K) -> dict:
     reordered = reorder_for_llm(chunks)
     context = format_context(reordered)
     user_message = (
-        f"Dựa vào các đoạn văn bản (context) sau đây, hãy trả lời câu hỏi bằng tiếng Việt.\n"
-        f"Mỗi khẳng định quan trọng phải kèm trích dẫn nguồn ở định dạng [Document X | Source].\n"
+        f"Dựa vào các đoạn văn bản (context) sau đây, hãy trả lời câu hỏi bằng tiếng Việt một cách rõ ràng, mạch lạc.\n"
+        f"Mỗi khẳng định quan trọng bắt buộc phải kèm trích dẫn đích danh tên văn bản/quyết định trong ngoặc vuông (ví dụ: [QĐ 3626/QĐ-ĐHQGHN], [QĐ 4618/QĐ-ĐHQGHN], hoặc [Tổng hợp học bổng SĐH UET]), TUYỆT ĐỐI không ghi chung chung là [Document X | Source].\n"
         f"Nếu context không đủ cơ sở để trả lời chắc chắn, hãy nói 'Tôi không thể xác minh thông tin này từ nguồn hiện có.'\n\n"
         f"Context:\n{context}\n\n"
         f"Câu hỏi: {query}"
