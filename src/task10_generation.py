@@ -27,8 +27,15 @@ TEMPERATURE = 0.3
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
 LLM_MODEL = os.getenv("LLM_MODEL", "")
 
-SYSTEM_PROMPT = """Trả lời chỉ từ context được cung cấp.
-Mỗi khẳng định phải có citation. Nếu thiếu evidence, hãy từ chối xác minh."""
+SYSTEM_PROMPT = """Bạn là trợ lý giải đáp Quy chế đào tạo và Dịch vụ sinh viên Trường Đại học Công nghệ (UET) - ĐHQGHN.
+Quy tắc trả lời:
+1. Trả lời CHỈ dựa trên context được cung cấp, tuyệt đối không suy diễn ngoài ngữ cảnh.
+2. Về mặt thẩm quyền và ngữ cảnh:
+   - Các nguyên tắc khung (thang điểm, cảnh báo học vụ, chuẩn đầu ra, điều kiện tốt nghiệp): Áp dụng theo Quy chế đào tạo ĐHQGHN.
+   - Các hướng dẫn thực thi (địa điểm nộp hồ sơ P.107-G2, phòng CTSV 210-G2, lịch bế giảng Hội trường Nguyễn Văn Đạo, hạn chót BHYT): Áp dụng theo thông báo của Trường ĐH Công nghệ (UET).
+3. Mỗi khẳng định quan trọng phải có trích dẫn nguồn (citation) rõ ràng ở định dạng [Document X | Source].
+4. Nếu context không có đủ bằng chứng xác thực để khẳng định, hãy từ chối lịch sự bằng câu: "Tôi không thể xác minh thông tin này từ nguồn hiện có."
+"""
 
 
 def reorder_for_llm(chunks: list[dict]) -> list[dict]:
