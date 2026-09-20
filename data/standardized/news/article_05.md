@@ -10,7 +10,13 @@
 
 # Tổng hợp về học bổng bậc sau đại học tại UET năm 2021
 
-Danh sách các chương trình học bổng sau đại học dành cho người học và nghiên cứu sinh tại Trường Đại học Công nghệ (UET) năm 2021:
+Danh sách các chương trình học bổng sau đại học dành cho người học và nghiên cứu sinh tại Trường Đại học Công nghệ (UET) năm 2021 với mức kinh phí và giá trị cụ thể:
+- Học bổng của ĐHQGHN: 60.000.000 đồng/khóa học (NCS thạc sĩ), 90.000.000 đồng/khóa học (NCS cử nhân).
+- Học bổng UTS-UET: 800 AUD/tháng (tại UET); 26.280 AUD/năm và miễn học phí 35.000 AUD/năm (tại UTS).
+- Học bổng của Trường ĐH Công nghệ (UET): 60.000.000 đồng/khóa học (NCS thạc sĩ), 80.000.000 đồng/khóa học (NCS cử nhân).
+- Học bổng Tập đoàn Vingroup: 120.000.000 đồng (thạc sĩ), 150.000.000 đồng (tiến sĩ).
+- Học bổng POSTECH_UET: 497.000.000 đồng/năm nghiên cứu.
+- Học bổng Tập đoàn Toshiba: 200.000 Yên Nhật/năm (toàn phần), 100.000 Yên Nhật/năm (bán phần).
 
 ### 1. Học bổng của ĐHQGHN (VNU)
 - Đối tượng: Nghiên cứu sinh của Trường ĐH Công nghệ.
@@ -26,9 +32,9 @@ Danh sách các chương trình học bổng sau đại học dành cho người
 - Thông tin liên hệ: Phòng Đào tạo UET: chị Nguyễn Khánh Ly – SĐT: 024 3754 7810.
 
 ### 3. Học bổng của Trường ĐH Công nghệ (UET)
-- Đối tượng: Nghiên cứu sinh của Trường ĐH Công nghệ.
+- Đối tượng: Nghiên cứu sinh của Trường ĐH Công nghệ (UET).
 - Tiêu chí: Dựa trên kết quả học tập bậc cử nhân hoặc thạc sĩ, công trình khoa học công bố, ngoại ngữ, điểm đề cương đầu vào.
-- Mức học bổng: Học bổng toàn phần của Trường ĐH Công nghệ: cho NCS từ thạc sĩ là 60.000.000 đồng/khóa học, cho NCS từ cử nhân là 80.000.000 đồng/khóa học.
+- Mức học bổng / Tiền học bổng: Học bổng toàn phần của Trường ĐH Công nghệ (UET): cho NCS từ thạc sĩ là 60.000.000 đồng/khóa học, cho NCS từ cử nhân là 80.000.000 đồng/khóa học.
 - Thông tin liên hệ: Phòng Đào tạo UET: chị Nguyễn Khánh Ly – SĐT: 024 3754 7810.
 
 ### 4. Học bổng của Tập đoàn Vingroup

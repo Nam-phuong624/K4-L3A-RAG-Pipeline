@@ -6,7 +6,29 @@ liệu và tên riêng. Output phải theo SearchResult và sort score giảm d�
 """
 
 
+import re
+
 CORPUS: list[dict] = []
+
+SYNONYM_EXPANSIONS = {
+    "tiền": ["mức", "kinh", "phí", "đồng", "giá", "trị"],
+    "nhiêu": ["mức", "định", "mức"],
+    "phí": ["tiền", "học", "phí"],
+}
+
+
+def tokenize(text: str) -> list[str]:
+    """Tách từ, chuẩn hóa chữ thường và loại bỏ dấu câu ngoại trừ chữ/số."""
+    return [token for token in re.findall(r"\w+", text.lower()) if token]
+
+
+def expand_query_tokens(tokens: list[str]) -> list[str]:
+    """Mở rộng câu truy vấn với các từ đồng nghĩa thông dụng."""
+    expanded = list(tokens)
+    for t in tokens:
+        if t in SYNONYM_EXPANSIONS:
+            expanded.extend(SYNONYM_EXPANSIONS[t])
+    return expanded
 
 
 def get_corpus() -> list[dict]:
@@ -25,7 +47,7 @@ def build_bm25_index(corpus: list[dict]):
     """Tạo BM25 index từ cùng corpus chunks của Task 4."""
     try:
         from rank_bm25 import BM25Okapi
-        tokenized = [item["content"].lower().split() for item in corpus]
+        tokenized = [tokenize(item["content"]) for item in corpus]
         return BM25Okapi(tokenized)
     except ImportError:
         # Pure Python BM25 fallback
@@ -34,7 +56,7 @@ def build_bm25_index(corpus: list[dict]):
 
         class PureBM25:
             def __init__(self, corpus_docs):
-                self.docs = [doc["content"].lower().split() for doc in corpus_docs]
+                self.docs = [tokenize(doc["content"]) for doc in corpus_docs]
                 self.N = len(self.docs)
                 self.avgdl = sum(len(d) for d in self.docs) / (self.N or 1)
                 self.doc_freqs = Counter()
@@ -70,7 +92,8 @@ def lexical_search(query: str, top_k: int = 10) -> list[dict]:
         return []
 
     bm25 = build_bm25_index(active_corpus)
-    scores = bm25.get_scores(query.lower().split())
+    query_tokens = expand_query_tokens(tokenize(query))
+    scores = bm25.get_scores(query_tokens)
 
     scored_items = [
         (float(score), item)

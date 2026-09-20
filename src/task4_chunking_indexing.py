@@ -232,11 +232,24 @@ def embed_chunks(chunks: list[dict]) -> list[dict]:
 
 
 def index_to_vectorstore(chunks: list[dict]) -> None:
-    """Upsert chunks vào ChromaDB."""
+    """Upsert chunks vào ChromaDB và xóa các chunk cũ không còn trong dữ liệu chuẩn."""
     if not chunks:
         return
-    collection = get_collection()
-    
+    import chromadb
+    CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+    client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+    collection = client.get_or_create_collection(
+        name=COLLECTION_NAME,
+        metadata={"hnsw:space": "cosine"},
+    )
+
+    current_ids = set(chunk["id"] for chunk in chunks)
+    existing = collection.get()
+    if existing and existing.get("ids"):
+        stale_ids = [cid for cid in existing["ids"] if cid not in current_ids]
+        if stale_ids:
+            collection.delete(ids=stale_ids)
+
     batch_size = 200
     for i in range(0, len(chunks), batch_size):
         batch = chunks[i:i + batch_size]

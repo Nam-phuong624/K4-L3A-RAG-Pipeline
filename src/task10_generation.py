@@ -52,12 +52,12 @@ def reorder_for_llm(chunks: list[dict]) -> list[dict]:
 def format_context(chunks: list[dict]) -> str:
     """Tạo context có title và source label."""
     parts = []
-    for index, chunk in enumerate(chunks, 1):
+    for chunk in chunks:
         metadata = chunk.get("metadata", {})
         title = metadata.get("title", "Tài liệu")
         source = metadata.get("source", "Nguồn")
         parts.append(
-            f"[Document {index} | Title: {title} | Source: {source}]\n{chunk.get('content', '')}"
+            f"[{title} | Nguồn: {source}]\n{chunk.get('content', '')}"
         )
     return "\n\n---\n\n".join(parts)
 
