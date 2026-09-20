@@ -28,7 +28,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### Tài liệu trong hệ thống:")
     st.markdown("- **Legal:** QĐ 3626 (Đào tạo), QĐ 4618 (Học bổng), QĐ 2244 (Học vụ)")
-    st.markdown("- **News/Notices:** Thông báo tốt nghiệp K66, BHYT, Học bổng Vingroup, Cuộc thi SV...")
+    st.markdown("- **News/Notices:** Kế hoạch tốt nghiệp K66, BHYT, Học bổng Vingroup, Học bổng SĐH UET...")
     
     if st.button("Xóa lịch sử hội thoại"):
         st.session_state.messages = []
@@ -43,16 +43,19 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
         if "sources" in message and message["sources"]:
             retrieval_method = message.get("retrieval_source", "hybrid")
-            with st.expander(f"📚 Xem nguồn trích dẫn & Retrieval ({retrieval_method.upper()} - {len(message[sources])} chunks)"):
+            num_chunks = len(message["sources"])
+            with st.expander(f"📚 Xem nguồn trích dẫn & Retrieval ({retrieval_method.upper()} - {num_chunks} chunks)"):
                 for idx, src in enumerate(message["sources"], 1):
                     meta = src.get("metadata", {})
                     title = meta.get("title", "Tài liệu")
                     source_name = meta.get("source", "Tài liệu gốc")
                     doc_type = meta.get("doc_type", "Chung")
                     score = src.get("score", 0.0)
+                    chunk_id = src.get("id", "N/A")
+                    content_snippet = src.get("content", "")
                     st.markdown(f"**[{idx}] {title}** `({doc_type.upper()})` — *Score/Rank:* `{score:.4f}`")
-                    st.caption(f"Nguồn: `{source_name}` | Chunk ID: `{src.get(id, N/A)}`")
-                    st.markdown(f"> {src.get(content, )}")
+                    st.caption(f"Nguồn: `{source_name}` | Chunk ID: `{chunk_id}`")
+                    st.markdown(f"> {content_snippet}")
                     st.divider()
 
 query = st.chat_input("Nhập câu hỏi về quy chế hoặc thông báo sinh viên UET...")
@@ -74,16 +77,19 @@ if query:
             st.markdown(answer)
 
             if sources:
-                with st.expander(f"📚 Xem nguồn trích dẫn & Retrieval ({retrieval_source.upper()} - {len(sources)} chunks)"):
+                num_chunks = len(sources)
+                with st.expander(f"📚 Xem nguồn trích dẫn & Retrieval ({retrieval_source.upper()} - {num_chunks} chunks)"):
                     for idx, src in enumerate(sources, 1):
                         meta = src.get("metadata", {})
                         title = meta.get("title", "Tài liệu")
                         source_name = meta.get("source", "Tài liệu gốc")
                         doc_type = meta.get("doc_type", "Chung")
                         score = src.get("score", 0.0)
+                        chunk_id = src.get("id", "N/A")
+                        content_snippet = src.get("content", "")
                         st.markdown(f"**[{idx}] {title}** `({doc_type.upper()})` — *Score/Rank:* `{score:.4f}`")
-                        st.caption(f"Nguồn: `{source_name}` | Chunk ID: `{src.get(id, N/A)}`")
-                        st.markdown(f"> {src.get(content, )}")
+                        st.caption(f"Nguồn: `{source_name}` | Chunk ID: `{chunk_id}`")
+                        st.markdown(f"> {content_snippet}")
                         st.divider()
 
     # 3. Lưu vào lịch sử phiên làm việc
