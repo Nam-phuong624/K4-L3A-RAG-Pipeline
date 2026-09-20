@@ -43,8 +43,9 @@
   - Ban đầu: 3/5 acceptance tests passed (do thiếu Golden Dataset và RESULT.md).
   - Sau khi hoàn thiện: **20/20 tests passed (100%)**, toàn bộ 5/5 tiêu chí nghiệm thu đạt chuẩn.
 - Lỗi đã phát hiện và cách xử lý:
-  - File PDF tải về ban đầu của QĐ 3626 là bản scan ảnh không có text layer (0 ký tự trích xuất được) $ightarrow$ đã tìm và thay thế bằng bản Digital PDF chính thức của ĐHQGHN (52 trang, >96.000 ký tự text sạch).
-  - Các câu hỏi liên quan đến bảng điểm số học ("A+", "B+", "3.7") bị loãng ngữ nghĩa khi chỉ dùng Dense retrieval $ightarrow$ BM25 kết hợp RRF đã cứu và đưa chunk quy đổi điểm lên rank top đầu.
+  - File PDF tải về ban đầu của QĐ 3626 là bản scan ảnh không có text layer (0 ký tự trích xuất được) $\rightarrow$ đã tìm và thay thế bằng bản Digital PDF chính thức của ĐHQGHN (52 trang, >96.000 ký tự text sạch).
+  - Lỗi truy vấn *"học bổng uet bao nhiêu tiền"* bị Safe Refusal: Do BM25 băm từ bằng `split()` giữ nguyên dấu ngoặc `"(uet)"` và dấu hai chấm `"uet:"`, không match được token `"uet"` của người dùng; đồng thời thiếu Query Expansion giữa từ khẩu ngữ *"tiền"* với thuật ngữ văn bản (*"mức học bổng"*, *"kinh phí"*), và ChromaDB tồn đọng chunk rác cũ. Đã xử lý triệt để bằng regex tokenizer `re.findall(r"\w+", ...)`, Query Expansion, dọn dẹp vectorstore tự động và tối ưu hóa context citation (Commit `e1b63d4`).
+  - Các câu hỏi liên quan đến bảng điểm số học ("A+", "B+", "3.7") bị loãng ngữ nghĩa khi chỉ dùng Dense retrieval $\rightarrow$ BM25 kết hợp RRF đã đưa chunk quy đổi điểm lên rank top đầu.
 
 ---
 
